@@ -1,0 +1,4 @@
+{
+    "ICS_URL_PATH": "/calendar/calendar.ics",
+    "ICS_REMOTE_URL": "https://my-url/calendar.ics"
+}
