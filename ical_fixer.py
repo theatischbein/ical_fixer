@@ -1,3 +1,4 @@
+import sys
 import requests
 import re
 import os
@@ -62,15 +63,15 @@ class IcalFixer:
 
     def apply_fixes(self, data):
         pattern_multiline = re.compile(r"(SUMMARY:.+?)$\n*(^.+$)+\n(STATUS:.+$)", re.MULTILINE)
-        pattern_timezone = re.compile(r"^(DTSTART|DTEND|CREATED|LAST-MODIFIED|DTSTAMP)(.+?)Z$", re.MULTILINE)
+        pattern_timezone = re.compile(r"^(DTSTART|DTEND);TZID=.+?(:.+?)Z$", re.MULTILINE)
         pattern_allday_start = re.compile(r"(DTSTART;VALUE=DATE:)(\d{8})T000000Z")
         pattern_allday_end = re.compile(r"(DTEND;VALUE=DATE:)(\d{8})T000000Z")
 
-        fixed_data = pattern_allday_start.sub(r"\1\2", data)
+        fixed_data = pattern_timezone.sub(r"\1\2", data)
+        fixed_data = pattern_allday_start.sub(r"\1\2", fixed_data)
         fixed_data = pattern_allday_end.sub(lambda m: f"{m.group(1)}{m.group(2)}", fixed_data)
         fixed_data = re.sub(r"(DTEND;VALUE=DATE:)(\d{8})", lambda m: f"{m.group(1)}{int(m.group(2)) + 1:08d}", fixed_data)
 
-        fixed_data = pattern_timezone.sub(r"\1\2", fixed_data)
         fixed_data = pattern_multiline.sub(r"\1\2\n\3", fixed_data)
 
         return fixed_data
@@ -90,6 +91,6 @@ class IcalFixer:
 
 
 if __name__ == "__main__":
-    url = "https://my-url/calendar.ics"
+    url = sys.argv[1] if len(sys.argv) == 2 else "https://my-url/calendar.ics"
     ical_fixer = IcalFixer(url)
-    ical_fixer.convert()
+    print(ical_fixer.convert())
