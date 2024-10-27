@@ -51,7 +51,7 @@ class IcalFixer:
 
         ics_data = ""
         if response.status_code == 200:
-            ics_data = response.text.replace('\n', '\r\n')
+            ics_data = response.text
             with open(self.path_tmp_ics, "w") as f:
                 f.write(ics_data)
         elif response.status_code == 304:
@@ -93,4 +93,6 @@ class IcalFixer:
 if __name__ == "__main__":
     url = sys.argv[1] if len(sys.argv) == 2 else "https://my-url/calendar.ics"
     ical_fixer = IcalFixer(url)
-    print(ical_fixer.convert())
+    fixed_ical = ical_fixer.convert()
+    with open("converted.ics", "w") as f:
+        f.write(fixed_ical)
